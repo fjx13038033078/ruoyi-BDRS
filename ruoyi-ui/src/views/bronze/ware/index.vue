@@ -101,6 +101,12 @@
     <el-table v-loading="loading" :data="wareList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="ID" align="center" prop="id" width="60" />
+      <el-table-column label="图片" align="center" prop="images" width="100">
+        <template slot-scope="scope">
+          <image-preview v-if="scope.row.images" :src="scope.row.images" :width="50" :height="50" />
+          <span v-else>-</span>
+        </template>
+      </el-table-column>
       <el-table-column label="藏品名称" align="center" prop="name" :show-overflow-tooltip="true" />
       <el-table-column label="朝代" align="center" prop="dynasty" width="100">
         <template slot-scope="scope">
@@ -238,8 +244,8 @@
         </el-row>
         <el-row>
           <el-col :span="24">
-            <el-form-item label="图片地址" prop="images">
-              <el-input v-model="form.images" placeholder="请输入图片地址，多个用逗号分隔" />
+            <el-form-item label="藏品图片" prop="images">
+              <image-upload v-model="form.images" :limit="5" />
             </el-form-item>
           </el-col>
         </el-row>
