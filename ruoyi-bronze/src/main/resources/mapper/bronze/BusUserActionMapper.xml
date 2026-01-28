@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.bronze.mapper.BusUserActionMapper">
+
+    <resultMap type="com.ruoyi.bronze.domain.BusUserAction" id="BusUserActionResult">
+        <result property="id"           column="id"           />
+        <result property="userId"       column="user_id"      />
+        <result property="bronzeId"     column="bronze_id"    />
+        <result property="actionType"   column="action_type"  />
+        <result property="score"        column="score"        />
+        <result property="createTime"   column="create_time"  />
+        <result property="bronzeName"   column="bronze_name"  />
+        <result property="userName"     column="user_name"    />
+    </resultMap>
+
+    <sql id="selectBusUserActionVo">
+        select a.id, a.user_id, a.bronze_id, a.action_type, a.score, a.create_time,
+               b.name as bronze_name, u.nick_name as user_name
+        from bus_user_action a
+        left join bus_bronze_ware b on a.bronze_id = b.id
+        left join sys_user u on a.user_id = u.user_id
+    </sql>
+
+    <select id="selectBusUserActionById" parameterType="Long" resultMap="BusUserActionResult">
+        <include refid="selectBusUserActionVo"/>
+        where a.id = #{id}
+    </select>
+
+    <select id="selectBusUserActionList" parameterType="com.ruoyi.bronze.domain.BusUserAction" resultMap="BusUserActionResult">
+        <include refid="selectBusUserActionVo"/>
+        <where>
+            <if test="userId != null">
+                AND a.user_id = #{userId}
+            </if>
+            <if test="bronzeId != null">
+                AND a.bronze_id = #{bronzeId}
+            </if>
+            <if test="actionType != null and actionType != ''">
+                AND a.action_type = #{actionType}
+            </if>
+        </where>
+        order by a.create_time desc
+    </select>
+
+    <insert id="insertBusUserAction" parameterType="com.ruoyi.bronze.domain.BusUserAction" useGeneratedKeys="true" keyProperty="id">
+        insert into bus_user_action
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userId != null">user_id,</if>
+            <if test="bronzeId != null">bronze_id,</if>
+            <if test="actionType != null and actionType != ''">action_type,</if>
+            <if test="score != null">score,</if>
+            create_time
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="userId != null">#{userId},</if>
+            <if test="bronzeId != null">#{bronzeId},</if>
+            <if test="actionType != null and actionType != ''">#{actionType},</if>
+            <if test="score != null">#{score},</if>
+            sysdate()
+        </trim>
+    </insert>
+
+    <update id="updateBusUserAction" parameterType="com.ruoyi.bronze.domain.BusUserAction">
+        update bus_user_action
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="score != null">score = #{score},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteBusUserActionById" parameterType="Long">
+        delete from bus_user_action where id = #{id}
+    </delete>
+
+    <delete id="deleteBusUserActionByIds" parameterType="Long">
+        delete from bus_user_action where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="selectByUserAndBronzeAndType" resultMap="BusUserActionResult">
+        select a.id, a.user_id, a.bronze_id, a.action_type, a.score, a.create_time
+        from bus_user_action a
+        where a.user_id = #{userId} and a.bronze_id = #{bronzeId} and a.action_type = #{actionType}
+    </select>
+
+    <select id="selectUserFavorites" parameterType="Long" resultMap="BusUserActionResult">
+        <include refid="selectBusUserActionVo"/>
+        where a.user_id = #{userId} and a.action_type = '1'
+        order by a.create_time desc
+    </select>
+
+    <select id="countFavoritesByBronzeId" parameterType="Long" resultType="int">
+        select count(*) from bus_user_action where bronze_id = #{bronzeId} and action_type = '1'
+    </select>
+
+    <select id="countLikesByBronzeId" parameterType="Long" resultType="int">
+        select count(*) from bus_user_action where bronze_id = #{bronzeId} and action_type = '2'
+    </select>
+
+    <select id="avgScoreByBronzeId" parameterType="Long" resultType="Double">
+        select avg(score) from bus_user_action where bronze_id = #{bronzeId} and action_type = '3'
+    </select>
+
+</mapper>

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.bronze.mapper.BusViewLogMapper">
+
+    <resultMap type="com.ruoyi.bronze.domain.BusViewLog" id="BusViewLogResult">
+        <result property="id"           column="id"           />
+        <result property="userId"       column="user_id"      />
+        <result property="bronzeId"     column="bronze_id"    />
+        <result property="viewTime"     column="view_time"    />
+        <result property="ipAddr"       column="ip_addr"      />
+        <result property="bronzeName"   column="bronze_name"  />
+        <result property="userName"     column="user_name"    />
+    </resultMap>
+
+    <sql id="selectBusViewLogVo">
+        select v.id, v.user_id, v.bronze_id, v.view_time, v.ip_addr,
+               b.name as bronze_name, u.nick_name as user_name
+        from bus_view_log v
+        left join bus_bronze_ware b on v.bronze_id = b.id
+        left join sys_user u on v.user_id = u.user_id
+    </sql>
+
+    <select id="selectBusViewLogById" parameterType="Long" resultMap="BusViewLogResult">
+        <include refid="selectBusViewLogVo"/>
+        where v.id = #{id}
+    </select>
+
+    <select id="selectBusViewLogList" parameterType="com.ruoyi.bronze.domain.BusViewLog" resultMap="BusViewLogResult">
+        <include refid="selectBusViewLogVo"/>
+        <where>
+            <if test="userId != null">
+                AND v.user_id = #{userId}
+            </if>
+            <if test="bronzeId != null">
+                AND v.bronze_id = #{bronzeId}
+            </if>
+            <if test="ipAddr != null and ipAddr != ''">
+                AND v.ip_addr like concat('%', #{ipAddr}, '%')
+            </if>
+        </where>
+        order by v.view_time desc
+    </select>
+
+    <insert id="insertBusViewLog" parameterType="com.ruoyi.bronze.domain.BusViewLog" useGeneratedKeys="true" keyProperty="id">
+        insert into bus_view_log
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userId != null">user_id,</if>
+            <if test="bronzeId != null">bronze_id,</if>
+            <if test="ipAddr != null">ip_addr,</if>
+            view_time
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="userId != null">#{userId},</if>
+            <if test="bronzeId != null">#{bronzeId},</if>
+            <if test="ipAddr != null">#{ipAddr},</if>
+            sysdate()
+        </trim>
+    </insert>
+
+    <delete id="deleteBusViewLogById" parameterType="Long">
+        delete from bus_view_log where id = #{id}
+    </delete>
+
+    <delete id="deleteBusViewLogByIds" parameterType="Long">
+        delete from bus_view_log where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="selectUserViewHistory" parameterType="Long" resultMap="BusViewLogResult">
+        <include refid="selectBusViewLogVo"/>
+        where v.user_id = #{userId}
+        order by v.view_time desc
+    </select>
+
+    <select id="countViewersByBronzeId" parameterType="Long" resultType="int">
+        select count(distinct user_id) from bus_view_log where bronze_id = #{bronzeId} and user_id is not null
+    </select>
+
+</mapper>

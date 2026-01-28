@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.bronze.mapper.BusBronzeWareMapper">
+
+    <resultMap type="com.ruoyi.bronze.domain.BusBronzeWare" id="BusBronzeWareResult">
+        <result property="id"               column="id"               />
+        <result property="name"             column="name"             />
+        <result property="dynasty"          column="dynasty"          />
+        <result property="category"         column="category"         />
+        <result property="usageType"        column="usage_type"       />
+        <result property="pattern"          column="pattern"          />
+        <result property="excavationPlace"  column="excavation_place" />
+        <result property="collectionNo"     column="collection_no"    />
+        <result property="intro"            column="intro"            />
+        <result property="images"           column="images"           />
+        <result property="status"           column="status"           />
+        <result property="viewCount"        column="view_count"       />
+        <result property="delFlag"          column="del_flag"         />
+        <result property="createBy"         column="create_by"        />
+        <result property="createTime"       column="create_time"      />
+        <result property="updateBy"         column="update_by"        />
+        <result property="updateTime"       column="update_time"      />
+        <result property="remark"           column="remark"           />
+    </resultMap>
+
+    <sql id="selectBusBronzeWareVo">
+        select id, name, dynasty, category, usage_type, pattern, excavation_place, collection_no,
+               intro, images, status, view_count, del_flag, create_by, create_time, update_by, update_time, remark
+        from bus_bronze_ware
+    </sql>
+
+    <select id="selectBusBronzeWareById" parameterType="Long" resultMap="BusBronzeWareResult">
+        <include refid="selectBusBronzeWareVo"/>
+        where id = #{id} and del_flag = '0'
+    </select>
+
+    <select id="selectBusBronzeWareList" parameterType="com.ruoyi.bronze.domain.BusBronzeWare" resultMap="BusBronzeWareResult">
+        <include refid="selectBusBronzeWareVo"/>
+        <where>
+            del_flag = '0'
+            <if test="name != null and name != ''">
+                AND name like concat('%', #{name}, '%')
+            </if>
+            <if test="dynasty != null and dynasty != ''">
+                AND dynasty = #{dynasty}
+            </if>
+            <if test="category != null and category != ''">
+                AND category = #{category}
+            </if>
+            <if test="usageType != null and usageType != ''">
+                AND usage_type = #{usageType}
+            </if>
+            <if test="pattern != null and pattern != ''">
+                AND pattern like concat('%', #{pattern}, '%')
+            </if>
+            <if test="excavationPlace != null and excavationPlace != ''">
+                AND excavation_place like concat('%', #{excavationPlace}, '%')
+            </if>
+            <if test="collectionNo != null and collectionNo != ''">
+                AND collection_no like concat('%', #{collectionNo}, '%')
+            </if>
+            <if test="status != null and status != ''">
+                AND status = #{status}
+            </if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <insert id="insertBusBronzeWare" parameterType="com.ruoyi.bronze.domain.BusBronzeWare" useGeneratedKeys="true" keyProperty="id">
+        insert into bus_bronze_ware
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="name != null and name != ''">name,</if>
+            <if test="dynasty != null">dynasty,</if>
+            <if test="category != null">category,</if>
+            <if test="usageType != null">usage_type,</if>
+            <if test="pattern != null">pattern,</if>
+            <if test="excavationPlace != null">excavation_place,</if>
+            <if test="collectionNo != null">collection_no,</if>
+            <if test="intro != null">intro,</if>
+            <if test="images != null">images,</if>
+            <if test="status != null">status,</if>
+            <if test="viewCount != null">view_count,</if>
+            <if test="delFlag != null">del_flag,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="remark != null">remark,</if>
+            create_time
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="name != null and name != ''">#{name},</if>
+            <if test="dynasty != null">#{dynasty},</if>
+            <if test="category != null">#{category},</if>
+            <if test="usageType != null">#{usageType},</if>
+            <if test="pattern != null">#{pattern},</if>
+            <if test="excavationPlace != null">#{excavationPlace},</if>
+            <if test="collectionNo != null">#{collectionNo},</if>
+            <if test="intro != null">#{intro},</if>
+            <if test="images != null">#{images},</if>
+            <if test="status != null">#{status},</if>
+            <if test="viewCount != null">#{viewCount},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="remark != null">#{remark},</if>
+            sysdate()
+        </trim>
+    </insert>
+
+    <update id="updateBusBronzeWare" parameterType="com.ruoyi.bronze.domain.BusBronzeWare">
+        update bus_bronze_ware
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="dynasty != null">dynasty = #{dynasty},</if>
+            <if test="category != null">category = #{category},</if>
+            <if test="usageType != null">usage_type = #{usageType},</if>
+            <if test="pattern != null">pattern = #{pattern},</if>
+            <if test="excavationPlace != null">excavation_place = #{excavationPlace},</if>
+            <if test="collectionNo != null">collection_no = #{collectionNo},</if>
+            <if test="intro != null">intro = #{intro},</if>
+            <if test="images != null">images = #{images},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="viewCount != null">view_count = #{viewCount},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_time = sysdate()
+        </trim>
+        where id = #{id}
+    </update>
+
+    <update id="deleteBusBronzeWareById" parameterType="Long">
+        update bus_bronze_ware set del_flag = '2' where id = #{id}
+    </update>
+
+    <update id="deleteBusBronzeWareByIds" parameterType="Long">
+        update bus_bronze_ware set del_flag = '2' where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+    <update id="incrementViewCount" parameterType="Long">
+        update bus_bronze_ware set view_count = view_count + 1 where id = #{id}
+    </update>
+
+    <select id="selectBronzeWareByExhibitionId" parameterType="Long" resultMap="BusBronzeWareResult">
+        select b.id, b.name, b.dynasty, b.category, b.usage_type, b.pattern, b.excavation_place,
+               b.collection_no, b.intro, b.images, b.status, b.view_count, b.del_flag,
+               b.create_by, b.create_time, b.update_by, b.update_time, b.remark
+        from bus_bronze_ware b
+        inner join bus_exhibition_bronze eb on b.id = eb.bronze_id
+        where eb.exhibition_id = #{exhibitionId} and b.del_flag = '0'
+    </select>
+
+    <!-- 查询热门青铜器藏品列表 (按浏览量倒序) -->
+    <select id="selectHotBronzeList" parameterType="int" resultMap="BusBronzeWareResult">
+        <include refid="selectBusBronzeWareVo"/>
+        where del_flag = '0'
+        order by view_count desc
+        limit #{limit}
+    </select>
+
+</mapper>

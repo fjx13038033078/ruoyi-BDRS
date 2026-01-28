@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.bronze.mapper.BusExhibitionMapper">
+
+    <resultMap type="com.ruoyi.bronze.domain.BusExhibition" id="BusExhibitionResult">
+        <result property="id"           column="id"           />
+        <result property="title"        column="title"        />
+        <result property="theme"        column="theme"        />
+        <result property="startDate"    column="start_date"   />
+        <result property="endDate"      column="end_date"     />
+        <result property="coverImg"     column="cover_img"    />
+        <result property="description"  column="description"  />
+        <result property="status"       column="status"       />
+        <result property="delFlag"      column="del_flag"     />
+        <result property="createBy"     column="create_by"    />
+        <result property="createTime"   column="create_time"  />
+        <result property="updateBy"     column="update_by"    />
+        <result property="updateTime"   column="update_time"  />
+    </resultMap>
+
+    <sql id="selectBusExhibitionVo">
+        select id, title, theme, start_date, end_date, cover_img, description, status, del_flag,
+               create_by, create_time, update_by, update_time
+        from bus_exhibition
+    </sql>
+
+    <select id="selectBusExhibitionById" parameterType="Long" resultMap="BusExhibitionResult">
+        <include refid="selectBusExhibitionVo"/>
+        where id = #{id} and del_flag = '0'
+    </select>
+
+    <select id="selectBusExhibitionList" parameterType="com.ruoyi.bronze.domain.BusExhibition" resultMap="BusExhibitionResult">
+        <include refid="selectBusExhibitionVo"/>
+        <where>
+            del_flag = '0'
+            <if test="title != null and title != ''">
+                AND title like concat('%', #{title}, '%')
+            </if>
+            <if test="theme != null and theme != ''">
+                AND theme like concat('%', #{theme}, '%')
+            </if>
+            <if test="status != null and status != ''">
+                AND status = #{status}
+            </if>
+            <if test="params.beginStartDate != null and params.beginStartDate != ''">
+                AND start_date &gt;= #{params.beginStartDate}
+            </if>
+            <if test="params.endStartDate != null and params.endStartDate != ''">
+                AND start_date &lt;= #{params.endStartDate}
+            </if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <insert id="insertBusExhibition" parameterType="com.ruoyi.bronze.domain.BusExhibition" useGeneratedKeys="true" keyProperty="id">
+        insert into bus_exhibition
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="title != null and title != ''">title,</if>
+            <if test="theme != null">theme,</if>
+            <if test="startDate != null">start_date,</if>
+            <if test="endDate != null">end_date,</if>
+            <if test="coverImg != null">cover_img,</if>
+            <if test="description != null">description,</if>
+            <if test="status != null">status,</if>
+            <if test="delFlag != null">del_flag,</if>
+            <if test="createBy != null">create_by,</if>
+            create_time
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="title != null and title != ''">#{title},</if>
+            <if test="theme != null">#{theme},</if>
+            <if test="startDate != null">#{startDate},</if>
+            <if test="endDate != null">#{endDate},</if>
+            <if test="coverImg != null">#{coverImg},</if>
+            <if test="description != null">#{description},</if>
+            <if test="status != null">#{status},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+            <if test="createBy != null">#{createBy},</if>
+            sysdate()
+        </trim>
+    </insert>
+
+    <update id="updateBusExhibition" parameterType="com.ruoyi.bronze.domain.BusExhibition">
+        update bus_exhibition
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="title != null and title != ''">title = #{title},</if>
+            <if test="theme != null">theme = #{theme},</if>
+            <if test="startDate != null">start_date = #{startDate},</if>
+            <if test="endDate != null">end_date = #{endDate},</if>
+            <if test="coverImg != null">cover_img = #{coverImg},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            update_time = sysdate()
+        </trim>
+        where id = #{id}
+    </update>
+
+    <update id="deleteBusExhibitionById" parameterType="Long">
+        update bus_exhibition set del_flag = '2' where id = #{id}
+    </update>
+
+    <update id="deleteBusExhibitionByIds" parameterType="Long">
+        update bus_exhibition set del_flag = '2' where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+</mapper>

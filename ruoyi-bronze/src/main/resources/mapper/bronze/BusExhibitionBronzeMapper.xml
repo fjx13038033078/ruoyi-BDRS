@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.bronze.mapper.BusExhibitionBronzeMapper">
+
+    <resultMap type="com.ruoyi.bronze.domain.BusExhibitionBronze" id="BusExhibitionBronzeResult">
+        <result property="exhibitionId"  column="exhibition_id"  />
+        <result property="bronzeId"      column="bronze_id"      />
+    </resultMap>
+
+    <insert id="batchInsertExhibitionBronze">
+        insert into bus_exhibition_bronze (exhibition_id, bronze_id) values
+        <foreach item="item" index="index" collection="list" separator=",">
+            (#{item.exhibitionId}, #{item.bronzeId})
+        </foreach>
+    </insert>
+
+    <delete id="deleteByExhibitionId" parameterType="Long">
+        delete from bus_exhibition_bronze where exhibition_id = #{exhibitionId}
+    </delete>
+
+    <delete id="deleteByBronzeId" parameterType="Long">
+        delete from bus_exhibition_bronze where bronze_id = #{bronzeId}
+    </delete>
+
+    <select id="selectBronzeIdsByExhibitionId" parameterType="Long" resultType="Long">
+        select bronze_id from bus_exhibition_bronze where exhibition_id = #{exhibitionId}
+    </select>
+
+</mapper>
