@@ -28,6 +28,9 @@ import Layout from '@/layout'
   }
  */
 
+// 前台布局
+const FrontLayout = () => import('@/views/front/layout/FrontLayout')
+
 // 公共路由
 export const constantRoutes = [
   {
@@ -60,6 +63,56 @@ export const constantRoutes = [
     path: '/401',
     component: () => import('@/views/error/401'),
     hidden: true
+  },
+  // 前台门户路由
+  {
+    path: '/front',
+    component: FrontLayout,
+    hidden: true,
+    children: [
+      {
+        path: '',
+        component: () => import('@/views/front/index/FrontIndex'),
+        name: 'FrontIndex',
+        meta: { title: '首页' }
+      },
+      {
+        path: 'bronze',
+        component: () => import('@/views/front/bronze/FrontBronze'),
+        name: 'FrontBronze',
+        meta: { title: '青铜器库' }
+      },
+      {
+        path: 'bronze/:id',
+        component: () => import('@/views/front/bronze/FrontBronzeDetail'),
+        name: 'FrontBronzeDetail',
+        meta: { title: '藏品详情' }
+      },
+      {
+        path: 'exhibition',
+        component: () => import('@/views/front/exhibition/FrontExhibition'),
+        name: 'FrontExhibition',
+        meta: { title: '数字展览' }
+      },
+      {
+        path: 'exhibition/:id',
+        component: () => import('@/views/front/exhibition/FrontExhibitionDetail'),
+        name: 'FrontExhibitionDetail',
+        meta: { title: '展览详情' }
+      },
+      {
+        path: 'favorite',
+        component: () => import('@/views/front/favorite/FrontFavorite'),
+        name: 'FrontFavorite',
+        meta: { title: '我的收藏' }
+      },
+      {
+        path: 'profile',
+        component: () => import('@/views/front/profile/FrontProfile'),
+        name: 'FrontProfile',
+        meta: { title: '个人中心' }
+      }
+    ]
   },
   {
     path: '',
