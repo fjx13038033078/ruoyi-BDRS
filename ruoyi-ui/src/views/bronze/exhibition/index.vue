@@ -79,6 +79,12 @@
     <el-table v-loading="loading" :data="exhibitionList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="ID" align="center" prop="id" width="60" />
+      <el-table-column label="封面" align="center" prop="coverImg" width="100">
+        <template slot-scope="scope">
+          <image-preview v-if="scope.row.coverImg" :src="scope.row.coverImg" :width="50" :height="50" />
+          <span v-else>-</span>
+        </template>
+      </el-table-column>
       <el-table-column label="展览名称" align="center" prop="title" :show-overflow-tooltip="true" />
       <el-table-column label="展览主题" align="center" prop="theme" :show-overflow-tooltip="true" />
       <el-table-column label="开始时间" align="center" prop="startDate" width="120">
@@ -175,7 +181,7 @@
         <el-row>
           <el-col :span="24">
             <el-form-item label="封面图片" prop="coverImg">
-              <el-input v-model="form.coverImg" placeholder="请输入封面图片地址" />
+              <image-upload v-model="form.coverImg" :limit="1" />
             </el-form-item>
           </el-col>
         </el-row>
