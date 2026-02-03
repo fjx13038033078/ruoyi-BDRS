@@ -1,214 +1,480 @@
 <template>
-  <div>
-    <div ref="echartsText" style="margin-top: 10px; height: 100px; display: flex; justify-content: center; align-items: center;">
-      <!-- 这里 ECharts 动画文本会被渲染 -->
+  <div class="dashboard-container">
+    <!-- 标题区域 -->
+    <div class="dashboard-header">
+      <div class="header-content">
+        <h1 class="main-title">青铜器数字推荐系统</h1>
+        <p class="sub-title">Bronze Ware Digital Recommendation System</p>
+      </div>
+      <div class="header-decoration"></div>
     </div>
-    <div>
-      <!-- 通知公告 -->
-      <el-row style="margin-top: 10px;">
-        <el-col :span="12">
-          <el-card style="margin-right: 20px; height: 420px;">
-            <h3 slot="header">通知公告</h3>
-            <el-table v-loading="loading" :data="noticeList">
-              <el-table-column label="序号" align="center" prop="noticeId" width="100"/>
-              <el-table-column
-                label="公告标题"
-                align="center"
-                prop="noticeTitle"
-                :show-overflow-tooltip="true"
-              >
-                <template slot-scope="scope">
-                  <span @click="showNoticeContent(scope.row)">{{ scope.row.noticeTitle }}</span>
-                </template>
-              </el-table-column>
-              <el-table-column label="公告类型" align="center" prop="noticeType" width="100">
-                <template slot-scope="scope">
-                  <dict-tag :options="dict.type.sys_notice_type" :value="scope.row.noticeType"/>
-                </template>
-              </el-table-column>
-              <el-table-column label="创建时间" align="center" prop="createTime" width="100">
-                <template slot-scope="scope">
-                  <span>{{ parseTime(scope.row.createTime, '{y}-{m}-{d}') }}</span>
-                </template>
-              </el-table-column>
-            </el-table>
-          </el-card>
-        </el-col>
-        <el-col :span="12">
-          <el-card style="margin-right: 20px; height: 420px;">
-            <h3 slot="header">校外链接</h3>
-            <el-carousel :interval="5000" arrow="always">
-              <el-carousel-item>
-                <a href="https://www.baidu.com" target="_blank">
-                  <img src="../assets/images/01.jpg" alt="Image 1" style="width: 100%;">
-                </a>
-              </el-carousel-item>
-              <el-carousel-item>
-                <a href="https://www.jd.com" target="_blank">
-                  <img src="../assets/images/02.jpg" alt="Image 2" style="width: 100%;">
-                </a>
-              </el-carousel-item>
-              <el-carousel-item>
-                <a href="https://www.taobao.com" target="_blank">
-                  <img src="../assets/images/03.jpg" alt="Image 3" style="width: 100%;">
-                </a>
-              </el-carousel-item>
-            </el-carousel>
-          </el-card>
-        </el-col>
-      </el-row>
-      <!-- 弹出的公告内容卡片 -->
-      <el-dialog :title="selectedNotice.title" :visible.sync="showNoticeDialog" width="780px" append-to-body>
-        <div slot="title" style="text-align: center;">{{ selectedNotice.title }}</div>
-        <div v-html="selectedNotice.content" class="notice-content"></div>
-      </el-dialog>
-    </div>
+
+    <!-- 汇总数据卡片 -->
+    <el-row :gutter="20" class="summary-row">
+      <el-col :span="6">
+        <div class="summary-card">
+          <div class="summary-icon bronze-icon">
+            <i class="el-icon-goods"></i>
+          </div>
+          <div class="summary-info">
+            <span class="summary-value">{{ summary.bronzeCount || 0 }}</span>
+            <span class="summary-label">藏品总数</span>
+          </div>
+        </div>
+      </el-col>
+      <el-col :span="6">
+        <div class="summary-card">
+          <div class="summary-icon view-icon">
+            <i class="el-icon-view"></i>
+          </div>
+          <div class="summary-info">
+            <span class="summary-value">{{ summary.totalViews || 0 }}</span>
+            <span class="summary-label">总浏览量</span>
+          </div>
+        </div>
+      </el-col>
+      <el-col :span="6">
+        <div class="summary-card">
+          <div class="summary-icon action-icon">
+            <i class="el-icon-star-on"></i>
+          </div>
+          <div class="summary-info">
+            <span class="summary-value">{{ summary.actionCount || 0 }}</span>
+            <span class="summary-label">互动次数</span>
+          </div>
+        </div>
+      </el-col>
+      <el-col :span="6">
+        <div class="summary-card">
+          <div class="summary-icon user-icon">
+            <i class="el-icon-user"></i>
+          </div>
+          <div class="summary-info">
+            <span class="summary-value">{{ summary.userCount || 0 }}</span>
+            <span class="summary-label">活跃用户</span>
+          </div>
+        </div>
+      </el-col>
+    </el-row>
+
+    <!-- 图表区域 -->
+    <el-row :gutter="20" class="chart-row">
+      <el-col :span="12">
+        <el-card class="chart-card" shadow="never">
+          <div slot="header" class="chart-header">
+            <span class="chart-title">藏品朝代分布</span>
+          </div>
+          <div ref="dynastyChart" class="chart-container"></div>
+        </el-card>
+      </el-col>
+      <el-col :span="12">
+        <el-card class="chart-card" shadow="never">
+          <div slot="header" class="chart-header">
+            <span class="chart-title">藏品器型分布</span>
+          </div>
+          <div ref="categoryChart" class="chart-container"></div>
+        </el-card>
+      </el-col>
+    </el-row>
+
+    <el-row :gutter="20" class="chart-row">
+      <el-col :span="12">
+        <el-card class="chart-card" shadow="never">
+          <div slot="header" class="chart-header">
+            <span class="chart-title">用户行为统计</span>
+          </div>
+          <div ref="actionChart" class="chart-container"></div>
+        </el-card>
+      </el-col>
+      <el-col :span="12">
+        <el-card class="chart-card" shadow="never">
+          <div slot="header" class="chart-header">
+            <span class="chart-title">近7天浏览趋势</span>
+          </div>
+          <div ref="viewTrendChart" class="chart-container"></div>
+        </el-card>
+      </el-col>
+    </el-row>
   </div>
 </template>
+
 <script>
 import * as echarts from 'echarts'
-import {parseTime} from "../utils/ruoyi";
-import {getNotice, listNotice} from "../api/system/notice";
+import { getDashboardData } from '@/api/bronze/statistics'
 
 export default {
-  name: "Notice",
-  dicts: ['sys_notice_status', 'sys_notice_type'],
+  name: 'Dashboard',
+  dicts: ['bus_dynasty', 'bus_category'],
   data() {
     return {
-      // 遮罩层
-      loading: true,
-      // 选中数组
-      ids: [],
-      // 非单个禁用
-      single: true,
-      // 非多个禁用
-      multiple: true,
-      // 显示搜索条件
-      showSearch: true,
-      // 总条数
-      total: 0,
-      // 公告表格数据
-      noticeList: [],
-      // 弹出层标题
-      title: "",
-      // 是否显示弹出层
-      open: false,
-      failureRateByCourseData: {},
-      averageScoreByCourseData: {},
-      // 查询参数
-      queryParams: {
-        pageNum: 1,
-        pageSize: 10,
-        noticeTitle: undefined,
-        createBy: undefined,
-        status: undefined
-      },
-      selectedNotice: {
-        title: '',
-        content: ''
-      },
-      showNoticeDialog: false,
-      // 表单参数
-      form: {},
-      // 表单校验
-      rules: {
-        noticeTitle: [
-          {required: true, message: "公告标题不能为空", trigger: "blur"}
-        ],
-        noticeType: [
-          {required: true, message: "公告类型不能为空", trigger: "change"}
-        ]
-      }
-    };
-  },
-  created() {
-    this.getList();
+      summary: {},
+      dynastyData: [],
+      categoryData: [],
+      actionData: {},
+      viewTrendData: {},
+      charts: []
+    }
   },
   mounted() {
-    this.initEchartsText();
+    this.loadData()
+    window.addEventListener('resize', this.handleResize)
+  },
+  beforeDestroy() {
+    window.removeEventListener('resize', this.handleResize)
+    this.charts.forEach(chart => chart.dispose())
   },
   methods: {
-    parseTime,
-    /** 查询公告列表 */
-    getList() {
-      this.loading = true;
-      listNotice(this.queryParams).then(response => {
-        this.noticeList = response.rows;
-        this.total = response.total;
-        this.loading = false;
-      });
+    loadData() {
+      getDashboardData().then(response => {
+        const data = response.data
+        this.summary = data.summary || {}
+        this.dynastyData = data.dynastyDistribution || []
+        this.categoryData = data.categoryDistribution || []
+        this.actionData = data.actionStatistics || {}
+        this.viewTrendData = data.viewTrend || {}
+
+        this.$nextTick(() => {
+          this.initDynastyChart()
+          this.initCategoryChart()
+          this.initActionChart()
+          this.initViewTrendChart()
+        })
+      })
     },
-    showNoticeContent(row) {
-      this.loading = true;
-      getNotice(row.noticeId).then((response) => {
-        this.selectedNotice.title = response.data.noticeTitle;
-        this.selectedNotice.content = response.data.noticeContent;
-        this.showNoticeDialog = true;
-        this.loading = false;
-      });
+    getDictLabel(dictType, value) {
+      const dict = this.dict.type[dictType]
+      if (dict) {
+        const item = dict.find(d => d.value === value)
+        return item ? item.label : value
+      }
+      return value
     },
-    // 初始化 ECharts 动画文本
-    initEchartsText() {
-      const chartDom = this.$refs.echartsText;
-      const myChart = echarts.init(chartDom);
+    initDynastyChart() {
+      const chartDom = this.$refs.dynastyChart
+      const chart = echarts.init(chartDom)
+      this.charts.push(chart)
+
+      const data = this.dynastyData.map(item => ({
+        name: this.getDictLabel('bus_dynasty', item.name),
+        value: item.value
+      }))
+
       const option = {
-        graphic: {
-          elements: [
-            {
-              type: 'text',
-              left: 'center',
-              top: 'center',
-              style: {
-                text: '青铜器数字推荐系统',
-                fontSize: 80,
-                fontWeight: 'bold',
-                lineDash: [0, 200],
-                lineDashOffset: 0,
-                fill: 'transparent',
-                stroke: '#000',
-                lineWidth: 1
-              },
-              keyframeAnimation: {
-                duration: 3000,
-                loop: true,
-                keyframes: [
-                  {
-                    percent: 0.7,
-                    style: {
-                      fill: 'transparent',
-                      lineDashOffset: 200,
-                      lineDash: [200, 0]
-                    }
-                  },
-                  {
-                    percent: 0.8,
-                    style: {
-                      fill: 'transparent'
-                    }
-                  },
-                  {
-                    percent: 1,
-                    style: {
-                      fill: 'black'
-                    }
-                  }
-                ]
-              }
+        tooltip: {
+          trigger: 'item',
+          formatter: '{b}: {c} ({d}%)'
+        },
+        legend: {
+          orient: 'vertical',
+          right: 20,
+          top: 'center'
+        },
+        color: ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#3ba272', '#fc8452', '#9a60b4'],
+        series: [{
+          type: 'pie',
+          radius: ['40%', '70%'],
+          center: ['40%', '50%'],
+          avoidLabelOverlap: false,
+          itemStyle: {
+            borderColor: '#fff',
+            borderWidth: 2
+          },
+          label: {
+            show: false
+          },
+          emphasis: {
+            label: {
+              show: true,
+              fontSize: 14,
+              fontWeight: 'bold'
             }
-          ]
-        }
-      };
-      myChart.setOption(option);
+          },
+          data: data
+        }]
+      }
+      chart.setOption(option)
     },
+    initCategoryChart() {
+      const chartDom = this.$refs.categoryChart
+      const chart = echarts.init(chartDom)
+      this.charts.push(chart)
+
+      const data = this.categoryData.map(item => ({
+        name: this.getDictLabel('bus_category', item.name),
+        value: item.value
+      }))
+
+      const option = {
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: { type: 'shadow' }
+        },
+        grid: {
+          left: '3%',
+          right: '4%',
+          bottom: '3%',
+          containLabel: true
+        },
+        xAxis: {
+          type: 'category',
+          data: data.map(d => d.name),
+          axisLabel: {
+            interval: 0,
+            rotate: 30
+          }
+        },
+        yAxis: {
+          type: 'value'
+        },
+        series: [{
+          type: 'bar',
+          data: data.map(d => d.value),
+          itemStyle: {
+            color: '#5470c6'
+          },
+          barWidth: '50%'
+        }]
+      }
+      chart.setOption(option)
+    },
+    initActionChart() {
+      const chartDom = this.$refs.actionChart
+      const chart = echarts.init(chartDom)
+      this.charts.push(chart)
+
+      const option = {
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: { type: 'shadow' }
+        },
+        grid: {
+          left: '3%',
+          right: '4%',
+          bottom: '3%',
+          containLabel: true
+        },
+        xAxis: {
+          type: 'category',
+          data: ['收藏', '点赞', '评分']
+        },
+        yAxis: {
+          type: 'value'
+        },
+        series: [{
+          type: 'bar',
+          data: [
+            { value: this.actionData.favorite || 0, itemStyle: { color: '#fac858' } },
+            { value: this.actionData.like || 0, itemStyle: { color: '#ee6666' } },
+            { value: this.actionData.rate || 0, itemStyle: { color: '#91cc75' } }
+          ],
+          barWidth: '40%'
+        }]
+      }
+      chart.setOption(option)
+    },
+    initViewTrendChart() {
+      const chartDom = this.$refs.viewTrendChart
+      const chart = echarts.init(chartDom)
+      this.charts.push(chart)
+
+      const option = {
+        tooltip: {
+          trigger: 'axis'
+        },
+        grid: {
+          left: '3%',
+          right: '4%',
+          bottom: '3%',
+          containLabel: true
+        },
+        xAxis: {
+          type: 'category',
+          boundaryGap: false,
+          data: this.viewTrendData.dates || []
+        },
+        yAxis: {
+          type: 'value'
+        },
+        series: [{
+          type: 'line',
+          data: this.viewTrendData.counts || [],
+          smooth: true,
+          symbol: 'circle',
+          symbolSize: 8,
+          lineStyle: {
+            width: 3,
+            color: '#5470c6'
+          },
+          itemStyle: {
+            color: '#5470c6'
+          },
+          areaStyle: {
+            color: 'rgba(84, 112, 198, 0.2)'
+          }
+        }]
+      }
+      chart.setOption(option)
+    },
+    handleResize() {
+      this.charts.forEach(chart => chart.resize())
+    }
   }
-};
+}
 </script>
 
 <style scoped lang="scss">
-.notice-content::v-deep img {
-  max-width: 100%;
-  height: auto;
-  display: block;
-  margin: 0 auto;
+.dashboard-container {
+  padding: 20px;
+  background-color: #f0f2f5;
+  min-height: calc(100vh - 84px);
+}
+
+// 标题区域
+.dashboard-header {
+  background-color: #fff;
+  padding: 30px 40px;
+  margin-bottom: 20px;
+  border: 1px solid #e8e8e8;
+  position: relative;
+  overflow: hidden;
+
+  .header-content {
+    position: relative;
+    z-index: 1;
+  }
+
+  .main-title {
+    font-size: 32px;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin: 0 0 8px 0;
+    letter-spacing: 4px;
+  }
+
+  .sub-title {
+    font-size: 14px;
+    color: #8c8c8c;
+    margin: 0;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .header-decoration {
+    position: absolute;
+    right: 40px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 120px;
+    height: 120px;
+    border: 3px solid #d4af37;
+    opacity: 0.3;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      right: 10px;
+      bottom: 10px;
+      border: 2px solid #d4af37;
+    }
+  }
+}
+
+// 汇总卡片
+.summary-row {
+  margin-bottom: 20px;
+}
+
+.summary-card {
+  background-color: #fff;
+  padding: 24px;
+  border: 1px solid #e8e8e8;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  transition: box-shadow 0.3s;
+
+  &:hover {
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  }
+
+  .summary-icon {
+    width: 56px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    i {
+      font-size: 28px;
+      color: #fff;
+    }
+
+    &.bronze-icon {
+      background-color: #5470c6;
+    }
+
+    &.view-icon {
+      background-color: #91cc75;
+    }
+
+    &.action-icon {
+      background-color: #fac858;
+    }
+
+    &.user-icon {
+      background-color: #ee6666;
+    }
+  }
+
+  .summary-info {
+    display: flex;
+    flex-direction: column;
+
+    .summary-value {
+      font-size: 28px;
+      font-weight: 600;
+      color: #1a1a1a;
+      line-height: 1.2;
+    }
+
+    .summary-label {
+      font-size: 14px;
+      color: #8c8c8c;
+      margin-top: 4px;
+    }
+  }
+}
+
+// 图表区域
+.chart-row {
+  margin-bottom: 20px;
+}
+
+.chart-card {
+  border: 1px solid #e8e8e8;
+
+  ::v-deep .el-card__header {
+    padding: 16px 20px;
+    border-bottom: 1px solid #e8e8e8;
+    background-color: #fafafa;
+  }
+
+  ::v-deep .el-card__body {
+    padding: 20px;
+  }
+
+  .chart-header {
+    .chart-title {
+      font-size: 16px;
+      font-weight: 500;
+      color: #1a1a1a;
+    }
+  }
+
+  .chart-container {
+    height: 300px;
+  }
 }
 </style>
