@@ -159,4 +159,35 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         limit #{limit}
     </select>
 
+    <!-- 查询高评分青铜器藏品列表 -->
+    <select id="selectTopRatedBronzeList" parameterType="int" resultMap="BusBronzeWareResult">
+        select b.id, b.name, b.dynasty, b.category, b.usage_type, b.pattern, b.excavation_place,
+               b.collection_no, b.intro, b.images, b.status, b.view_count, b.del_flag,
+               b.create_by, b.create_time, b.update_by, b.update_time, b.remark,
+               COALESCE(AVG(a.score), 0) as avg_score
+        from bus_bronze_ware b
+        left join bus_user_action a on b.id = a.bronze_id and a.action_type = '3'
+        where b.del_flag = '0'
+        group by b.id
+        order by avg_score desc, b.view_count desc
+        limit #{limit}
+    </select>
+
+    <!-- 查询最新青铜器藏品列表 -->
+    <select id="selectLatestBronzeList" parameterType="int" resultMap="BusBronzeWareResult">
+        <include refid="selectBusBronzeWareVo"/>
+        where del_flag = '0'
+        order by create_time desc
+        limit #{limit}
+    </select>
+
+    <!-- 根据ID列表查询青铜器藏品 -->
+    <select id="selectBronzeWareByIds" resultMap="BusBronzeWareResult">
+        <include refid="selectBusBronzeWareVo"/>
+        where del_flag = '0' and id in
+        <foreach item="id" collection="list" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
 </mapper>

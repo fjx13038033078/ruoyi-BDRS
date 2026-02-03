@@ -23,9 +23,9 @@
           <i class="el-icon-magic-stick"></i>
           猜你喜欢
         </h2>
-        <span class="section-subtitle">基于您的浏览偏好智能推荐</span>
+        <span class="section-subtitle">{{ recommendSubtitle }}</span>
       </div>
-      <div class="recommend-content">
+      <div class="recommend-content" v-loading="recommendLoading">
         <template v-if="recommendList.length > 0">
           <div class="bronze-grid">
             <div
@@ -39,6 +39,9 @@
                 <div class="card-overlay">
                   <span>查看详情</span>
                 </div>
+                <div class="card-badge recommend-badge" v-if="isLogin && !isColdStart">
+                  <i class="el-icon-star-on"></i> 为你推荐
+                </div>
               </div>
               <div class="card-info">
                 <h3 class="card-title">{{ item.name }}</h3>
@@ -50,14 +53,11 @@
             </div>
           </div>
         </template>
-        <template v-else>
+        <template v-else-if="!recommendLoading">
           <div class="empty-recommend">
             <i class="el-icon-discover"></i>
-            <p>登录后将为您智能推荐感兴趣的藏品</p>
-            <el-button type="primary" plain @click="$router.push('/login')" v-if="!isLogin">
-              立即登录
-            </el-button>
-            <el-button type="primary" plain @click="$router.push('/front/bronze')" v-else>
+            <p>暂无推荐内容</p>
+            <el-button type="primary" plain @click="$router.push('/front/bronze')">
               去浏览藏品
             </el-button>
           </div>
@@ -153,6 +153,7 @@
 <script>
 import { listWare } from '@/api/bronze/ware'
 import { listExhibition } from '@/api/bronze/exhibition'
+import { getRecommendations, getHotRecommendations } from '@/api/bronze/recommend'
 
 export default {
   name: 'FrontIndex',
@@ -162,6 +163,7 @@ export default {
       // 推荐列表
       recommendList: [],
       recommendLoading: false,
+      isColdStart: false, // 是否为冷启动推荐
       // 热门列表
       hotList: [],
       hotLoading: false,
@@ -173,13 +175,44 @@ export default {
   computed: {
     isLogin() {
       return this.$store.getters.token
+    },
+    recommendSubtitle() {
+      if (this.isColdStart) {
+        return '热门精选推荐'
+      }
+      return this.isLogin ? '基于您的浏览偏好智能推荐' : '登录后获取个性化推荐'
     }
   },
   created() {
+    this.loadRecommendList()
     this.loadHotList()
     this.loadExhibitionList()
   },
   methods: {
+    /** 加载推荐列表 */
+    loadRecommendList() {
+      this.recommendLoading = true
+      // 调用推荐API，后端会根据用户登录状态和行为记录返回个性化推荐或冷启动推荐
+      getRecommendations(8).then(response => {
+        this.recommendList = response.data || []
+        // 判断是否为冷启动：未登录或返回的是热门推荐
+        this.isColdStart = !this.isLogin
+        this.recommendLoading = false
+      }).catch(() => {
+        // 降级：获取热门推荐
+        this.loadColdStartRecommend()
+      })
+    },
+    /** 加载冷启动推荐（降级策略） */
+    loadColdStartRecommend() {
+      getHotRecommendations(8).then(response => {
+        this.recommendList = response.data || []
+        this.isColdStart = true
+        this.recommendLoading = false
+      }).catch(() => {
+        this.recommendLoading = false
+      })
+    },
     /** 加载热门藏品 */
     loadHotList() {
       this.hotLoading = true
@@ -485,6 +518,12 @@ export default {
         display: flex;
         align-items: center;
         gap: 4px;
+
+        &.recommend-badge {
+          background: linear-gradient(135deg, #d4af37 0%, #c9a227 100%);
+          color: #2c1810;
+          font-weight: 500;
+        }
       }
     }
 

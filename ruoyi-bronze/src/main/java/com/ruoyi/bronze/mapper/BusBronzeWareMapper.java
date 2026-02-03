@@ -80,4 +80,28 @@ public interface BusBronzeWareMapper {
      * @return 热门青铜器藏品集合
      */
     public List<BusBronzeWare> selectHotBronzeList(int limit);
+
+    /**
+     * 查询高评分青铜器藏品列表
+     *
+     * @param limit 查询数量
+     * @return 高评分青铜器藏品集合
+     */
+    public List<BusBronzeWare> selectTopRatedBronzeList(int limit);
+
+    /**
+     * 查询最新青铜器藏品列表
+     *
+     * @param limit 查询数量
+     * @return 最新青铜器藏品集合
+     */
+    public List<BusBronzeWare> selectLatestBronzeList(int limit);
+
+    /**
+     * 根据ID列表查询青铜器藏品
+     *
+     * @param ids ID列表
+     * @return 青铜器藏品集合
+     */
+    public List<BusBronzeWare> selectBronzeWareByIds(List<Long> ids);
 }
