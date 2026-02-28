@@ -1,10 +1,6 @@
 
 # BDRS(Bronze Artifact Digital Recommendation System)
 
-## 说明
-
-1.  本套代码仅作为若依最简功能基础版本代码，没有任何实际业务功能。
-
 ## 内置功能
 
 1.  用户管理：用户是系统操作者，该功能主要完成系统用户配置。
