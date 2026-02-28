@@ -111,6 +111,12 @@ export const constantRoutes = [
         component: () => import('@/views/front/profile/FrontProfile'),
         name: 'FrontProfile',
         meta: { title: '个人中心' }
+      },
+      {
+        path: 'settings',
+        component: () => import('@/views/front/profile/FrontSettings'),
+        name: 'FrontSettings',
+        meta: { title: '账号设置' }
       }
     ]
   },

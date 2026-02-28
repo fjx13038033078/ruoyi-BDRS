@@ -42,6 +42,9 @@ public class BusUserAction {
     /** 藏品名称 (非数据库字段, 用于展示) */
     private String bronzeName;
 
+    /** 藏品图片 (非数据库字段, 用于展示) */
+    private String bronzeImages;
+
     /** 用户名称 (非数据库字段, 用于展示) */
     private String userName;
 }

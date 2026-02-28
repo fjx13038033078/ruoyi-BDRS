@@ -12,12 +12,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="score"        column="score"        />
         <result property="createTime"   column="create_time"  />
         <result property="bronzeName"   column="bronze_name"  />
+        <result property="bronzeImages" column="bronze_images"/>
         <result property="userName"     column="user_name"    />
     </resultMap>
 
     <sql id="selectBusUserActionVo">
         select a.id, a.user_id, a.bronze_id, a.action_type, a.score, a.create_time,
-               b.name as bronze_name, u.nick_name as user_name
+               b.name as bronze_name, b.images as bronze_images, u.nick_name as user_name
         from bus_user_action a
         left join bus_bronze_ware b on a.bronze_id = b.id
         left join sys_user u on a.user_id = u.user_id

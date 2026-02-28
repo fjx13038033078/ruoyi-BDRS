@@ -9,7 +9,7 @@
       <div class="bronze-grid" v-if="favoriteList.length > 0">
         <div v-for="item in favoriteList" :key="item.id" class="bronze-card" @click="goDetail(item.bronzeId)">
           <div class="card-image">
-            <img :src="getImageUrl(item.bronzeName)" :alt="item.bronzeName" />
+            <img :src="getImageUrl(item.bronzeImages)" :alt="item.bronzeName" />
             <div class="card-overlay">
               <span>查看详情</span>
             </div>
@@ -56,8 +56,10 @@ export default {
         this.loading = false
       })
     },
-    getImageUrl(name) {
-      return require('@/assets/images/profile.jpg')
+    getImageUrl(images) {
+      if (!images) return require('@/assets/images/profile.jpg')
+      const firstImg = images.split(',')[0]
+      return firstImg.startsWith('http') ? firstImg : process.env.VUE_APP_BASE_API + firstImg
     },
     formatTime(time) {
       return time ? time.substring(0, 10) : ''

@@ -129,7 +129,15 @@
             </template>
           </el-table-column>
 <!--          <el-table-column label="余额" align="center" key="balance" prop="balance" v-if="columns[6].visible" />-->
-          <el-table-column label="创建时间" align="center" prop="createTime" v-if="columns[6].visible" width="160">
+          <el-table-column label="角色" align="center" key="roles" v-if="columns[6].visible" width="120">
+            <template slot-scope="scope">
+              <span v-if="scope.row.roles && scope.row.roles.length > 0">
+                {{ scope.row.roles.map(r => r.roleName).join('、') }}
+              </span>
+              <span v-else>-</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="创建时间" align="center" prop="createTime" v-if="columns[7].visible" width="160">
             <template slot-scope="scope">
               <span>{{ parseTime(scope.row.createTime) }}</span>
             </template>
@@ -187,11 +195,11 @@
               <el-input v-model="form.nickName" placeholder="请输入用户昵称" maxlength="30" />
             </el-form-item>
           </el-col>
-          <el-col :span="12">
-            <el-form-item label="归属部门/班级" prop="deptId">
-              <treeselect v-model="form.deptId" :options="deptOptions" :show-count="true" placeholder="请选择归属部门/班级" />
-            </el-form-item>
-          </el-col>
+<!--          <el-col :span="12">-->
+<!--            <el-form-item label="归属部门/班级" prop="deptId">-->
+<!--              <treeselect v-model="form.deptId" :options="deptOptions" :show-count="true" placeholder="请选择归属部门/班级" />-->
+<!--            </el-form-item>-->
+<!--          </el-col>-->
         </el-row>
         <el-row>
           <el-col :span="12">
@@ -258,15 +266,14 @@
 <!--          </el-col>-->
           <el-col :span="12">
             <el-form-item label="角色">
-              <el-select v-model="form.roleIds" multiple placeholder="请选择角色">
-                <el-option
+              <el-radio-group v-model="form.roleId">
+                <el-radio
                   v-for="item in roleOptions"
                   :key="item.roleId"
-                  :label="item.roleName"
-                  :value="item.roleId"
+                  :label="item.roleId"
                   :disabled="item.status == 1"
-                ></el-option>
-              </el-select>
+                >{{ item.roleName }}</el-radio>
+              </el-radio-group>
             </el-form-item>
           </el-col>
         </el-row>
@@ -403,7 +410,8 @@ export default {
         { key: 3, label: `部门/班级`, visible: true },
         { key: 4, label: `手机号码`, visible: true },
         { key: 5, label: `状态`, visible: true },
-        { key: 6, label: `创建时间`, visible: true }
+        { key: 6, label: `角色`, visible: true },
+        { key: 7, label: `创建时间`, visible: true }
       ],
       // 表单校验
       rules: {
@@ -506,7 +514,8 @@ export default {
         remark: undefined,
         balance:undefined,
         postIds: [],
-        roleIds: []
+        roleIds: [],
+        roleId: undefined
       };
       this.resetForm("form");
     },
@@ -563,6 +572,7 @@ export default {
         this.roleOptions = response.roles;
         this.$set(this.form, "postIds", response.postIds);
         this.$set(this.form, "roleIds", response.roleIds);
+        this.$set(this.form, "roleId", response.roleIds && response.roleIds.length > 0 ? response.roleIds[0] : undefined);
         this.open = true;
         this.title = "修改用户";
         this.form.password = "";
@@ -591,6 +601,8 @@ export default {
     submitForm: function() {
       this.$refs["form"].validate(valid => {
         if (valid) {
+          // 单选角色转为数组提交
+          this.form.roleIds = this.form.roleId ? [this.form.roleId] : [];
           if (this.form.userId != undefined) {
             updateUser(this.form).then(response => {
               this.$modal.msgSuccess("修改成功");

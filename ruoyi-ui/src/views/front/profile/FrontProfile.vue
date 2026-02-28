@@ -19,7 +19,7 @@
           <span>我的收藏</span>
           <i class="el-icon-arrow-right"></i>
         </div>
-        <div class="menu-item" @click="$router.push('/user/profile')">
+        <div class="menu-item" @click="$router.push('/front/settings')">
           <i class="el-icon-user"></i>
           <span>账号设置</span>
           <i class="el-icon-arrow-right"></i>
